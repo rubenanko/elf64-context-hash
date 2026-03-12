@@ -1,0 +1,16 @@
+[project]
+name = "elf64_context_hash"
+version = "0.1.0"
+dependencies = [
+                "argparse",
+                "pathlib",
+                "torch",
+                "tqdm",
+                "pyjson",
+                "networkx",
+                "angr",
+                "pebble"
+                ]
+
+[project.scripts]
+e64ctx = "cli:main"

@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: elf64_context_hash
+Version: 0.1.0
+Requires-Dist: argparse
+Requires-Dist: pathlib
+Requires-Dist: torch
+Requires-Dist: tqdm
+Requires-Dist: pyjson
+Requires-Dist: networkx
+Requires-Dist: angr
+Requires-Dist: pebble
