@@ -130,12 +130,12 @@ def main() -> None:
                 # b64_embedding = b64encode(pickle_dumps(embedding))
                 b64_embedding = b64encode(pickle_dumps(embedding)).decode("utf-8")
                 if args.stdout:
-                    print(f'function address : {hex(path[0])}\n{b64_embedding}',end="\n\n")
+                    print(f'function : {path[0]}\n{b64_embedding}',end="\n\n")
 
-                if hex(path[0]) in b64_embeddings.keys():
-                    b64_embeddings[hex(path[0])].append(b64_embedding)
+                if path[0] in b64_embeddings.keys():
+                    b64_embeddings[path[0]].append(b64_embedding)
                 else:
-                    b64_embeddings[hex(path[0])] = [b64_embedding]
+                    b64_embeddings[path[0]] = [b64_embedding]
 
             # saving_embeddings in a json file
 
@@ -145,6 +145,7 @@ def main() -> None:
             exit_code = 0
 
     elif args.compare:
+        exit_code = 0
         file1,file2 = args.compare
         file1 = Path(file1)
         file2 = Path(file2)
@@ -207,14 +208,14 @@ def main() -> None:
 
             heatmap = ax.imshow(proximity, aspect="auto", cmap=cmap, vmin=0, vmax=1)
 
-            ax.set_xticks(range(len(embeddings2.keys())))
-            ax.set_xticklabels(embeddings2.keys(), rotation=45, ha="right")
+            ax.set_xticks(range(len(embeddings1.keys())))
+            ax.set_xticklabels(embeddings1.keys(), rotation=45, ha="right")
 
-            ax.set_yticks(range(len(embeddings1.keys())))
-            ax.set_yticklabels(embeddings1.keys())
+            ax.set_yticks(range(len(embeddings2.keys())))
+            ax.set_yticklabels(embeddings2.keys())
 
-            ax.set_xlabel(f"Functions from {file2} (adresses)")
-            ax.set_ylabel(f"Functions from {file1} (adresses)")
+            ax.set_xlabel(f"Functions from {file1} (adresses)")
+            ax.set_ylabel(f"Functions from {file2} (adresses)")
             ax.set_title("Proximity heatmap between functions")
 
             plt.colorbar(heatmap, ax=ax, label=label)

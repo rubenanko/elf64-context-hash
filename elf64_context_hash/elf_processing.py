@@ -138,7 +138,8 @@ class BinaryAnalyzer:
                     token_path.extend(block_cache[blk_addr])
 
                 if token_path:
-                    bag.append((func_addr, token_path))
+                    func_alias = hex(func_addr - self.proj.loader.main_object.mapped_base) if func.name[:4] == "sub_" else func.name
+                    bag.append((func_alias, token_path))
 
         return bag
 
