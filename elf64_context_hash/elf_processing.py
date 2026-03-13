@@ -21,11 +21,13 @@ from concurrent.futures import as_completed
 from pathlib import Path
 from typing import Any, Generator, Iterator
 
+# disable an annoying useless log
+logging.getLogger("angr.state_plugins.unicorn_engine").disabled = True
+
 import angr
 import networkx as nx
 from pebble import ProcessPool  # pip install pebble
 from tqdm import tqdm  # pip install tqdm
-
 # Silence angr/cle — les erreurs de lifting sont gerees via <UNLIFTABLE>
 logging.getLogger("angr").setLevel(logging.ERROR)
 logging.getLogger("cle").setLevel(logging.ERROR)

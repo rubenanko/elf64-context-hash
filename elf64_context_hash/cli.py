@@ -2,14 +2,28 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from elf_processing import BinaryAnalyzer
+from elf64_context_hash.elf_processing import BinaryAnalyzer
 # import torch
 from tqdm import tqdm
-from constants import UNKNOWN_TOKEN,MASK_TOKEN
-from loaders import load_vocabulary,load_encoder,load_predictor,load_embeddings
-from torch import tensor,int64,flatten,norm,dot,device as torch_device,cuda,nn
+from elf64_context_hash.constants import UNKNOWN_TOKEN,MASK_TOKEN
 
-from pickle import dumps as pickle_dumps, loads as pickle_loads
+from elf64_context_hash.loaders import (load_vocabulary,
+                     load_encoder,
+                     load_predictor,
+                     load_embeddings)
+
+from torch import (tensor,
+                   int64,
+                   flatten,
+                   norm,dot,
+                   device as torch_device,
+                   cuda,
+                   nn)
+
+import matplotlib.pyplot as plt
+
+from pickle import (dumps as pickle_dumps, 
+                    loads as pickle_loads)
 from base64 import b64encode
 import json
 
@@ -59,6 +73,11 @@ def main() -> None:
     
     parser.add_argument("-D","--dot-product",
                     help="compare two specific execution paths using the dot product instead of the distance.",
+                    action="store_true",
+                    default=False)
+    
+    parser.add_argument("--plot",
+                    help="generate a heatmap of the comparision",
                     action="store_true",
                     default=False)
 
@@ -141,21 +160,67 @@ def main() -> None:
 
         embeddings1 = load_embeddings(file1,args.functions[0])    
         embeddings2 = load_embeddings(file2,args.functions[1])
-
+        functions_dist = {}
 
         for function1 in embeddings1:
+            functions_dist[function1] = {}
             for function2 in embeddings2:
+
+                functions_dist[function1][function2] = int(not args.dot_product)
+                cmp_function = max if args.dot_product else min
+
+                embeddings_pairs_counter = 0
                 for embedding1 in embeddings1[function1]:
                     for embedding2 in embeddings2[function2]:
+                        embeddings_pairs_counter += 1
                         max_length = max(embedding1.shape[0],embedding2.shape[0])
                         if embedding1.shape[0] < max_length:
                             embedding1 = nn.ZeroPad1d((0,max_length-embedding1.shape[0]))(embedding1)
                         else:
                             embedding2 = nn.ZeroPad1d((0,max_length-embedding2.shape[0]))(embedding2)
-                        
+
                         if args.dot_product:
-                            print(f'{function1} * {function2} : {"%.2f"}' % dot(embedding1,embedding2).item())
+                            result = dot(embedding1,embedding2).item()
+                            output = f'{function1} * {function2} : {"%.2f"}' % result
                         else:
-                            print(f'd({function1},{function2}) : {"%.2f"}' % norm(embedding1 - embedding2).item())
+                            result = norm(embedding1 - embedding2).item()
+                            output = f'd({function1},{function2}) : {"%.2f"}' % result
+
+                        if args.plot:
+                            functions_dist[function1][function2] = cmp_function(functions_dist[function1][function2],result)
+                        else:
+                            print(output)
+
+                # functions_dist[function1][function2] /= embeddings_pairs_counter
+        
+
+        if args.plot:
+            proximity = [
+                [
+                    functions_dist[function1][function2] for function1 in embeddings1
+                ] for function2 in embeddings2
+            ]
+
+            fig, ax = plt.subplots(figsize=(8, 5))
+            cmap = "plasma" if args.dot_product else "plasma_r"
+            label = "Dot product" if args.dot_product else "Distance" 
+
+            heatmap = ax.imshow(proximity, aspect="auto", cmap=cmap, vmin=0, vmax=1)
+
+            ax.set_xticks(range(len(embeddings2.keys())))
+            ax.set_xticklabels(embeddings2.keys(), rotation=45, ha="right")
+
+            ax.set_yticks(range(len(embeddings1.keys())))
+            ax.set_yticklabels(embeddings1.keys())
+
+            ax.set_xlabel(f"Functions from {file2} (adresses)")
+            ax.set_ylabel(f"Functions from {file1} (adresses)")
+            ax.set_title("Proximity heatmap between functions")
+
+            plt.colorbar(heatmap, ax=ax, label=label)
+            plt.tight_layout()
+            plt.savefig("heatmap.png", dpi=150)
+            plt.show()
+
 
     sys.exit(exit_code)

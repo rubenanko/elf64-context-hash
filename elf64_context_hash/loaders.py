@@ -1,13 +1,13 @@
 from pathlib import Path
 import json
-from constants import (DEFAULT_VOCAB_PATH,
+from elf64_context_hash.constants import (DEFAULT_VOCAB_PATH,
                        DEFAULT_CHECKPOINT_PATH,
                        DEFAULT_VOCAB_SIZE,
                        DEFAULT_PREDICTOR_DIM)
 import torch.nn as nn
 from torch import load as load_model, Tensor,tensor
-from model.encoder import Conv1DEncoder
-from model.predictor import Predictor
+from elf64_context_hash.model.encoder import Conv1DEncoder
+from elf64_context_hash.model.predictor import Predictor
 from pickle import loads as pickle_loads
 from base64 import b64decode
 import sys

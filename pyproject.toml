@@ -13,4 +13,4 @@ dependencies = [
                 ]
 
 [project.scripts]
-e64ctx = "cli:main"
+e64ctx = "elf64_context_hash.cli:main"
