@@ -1,6 +1,7 @@
 from pathlib import Path
 
 DEFAULT_DATA_PATH = Path("~/.elf64-context-hash").expanduser()
+DEFAULT_OUTPUT_PATH = "output"
 DEFAULT_REPO_ID = "rubenanko/binary-jepa"
 DEFAULT_VOCAB_PATH = DEFAULT_DATA_PATH / Path("vocab.json")
 DEFAULT_CHECKPOINT_PATH = DEFAULT_DATA_PATH / Path("latest.pt")

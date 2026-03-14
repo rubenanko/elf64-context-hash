@@ -1,11 +1,12 @@
 from __future__ import annotations
 import argparse
 import sys
+import os
 from pathlib import Path
 from elf64_context_hash.elf_processing import BinaryAnalyzer
 # import torch
 from tqdm import tqdm
-from elf64_context_hash.constants import UNKNOWN_TOKEN,MASK_TOKEN
+from elf64_context_hash.constants import UNKNOWN_TOKEN,MASK_TOKEN, DEFAULT_OUTPUT_PATH
 
 from elf64_context_hash.loaders import (load_vocabulary,
                      load_encoder,
@@ -40,8 +41,16 @@ def main() -> None:
     # storing arguments
     argv = sys.argv[1:]
     exit_code = 1
+    current_dir = os.getcwd()
 
     parser = argparse.ArgumentParser()
+
+    parser.add_argument("-O", "--output",
+                        help="Specify the output path of the computation.",
+                        type=str,
+                        nargs=1,
+                        default=None
+                        )
 
     parser.add_argument("-E","--encode",
                         help="compute the embedding of the target elf64 binaries",
@@ -82,6 +91,11 @@ def main() -> None:
                     default=False)
 
     args = parser.parse_args()
+
+    output_path = DEFAULT_OUTPUT_PATH if args.output is not None else os.path.join(current_dir, args.output)
+
+    if(not os.path.exists(output_path)):
+        os.mkdir(output_path)
 
     # outputing the encoded bag of path for each input elf64 file
     if args.encode:
@@ -139,7 +153,7 @@ def main() -> None:
 
             # saving_embeddings in a json file
 
-            with open(f'{file}-embeddings{"-predictor" if args.use_predictor else ""}.json',"w") as f:
+            with open(os.path.join(output_path, f'{file}-embeddings{"-predictor" if args.use_predictor else ""}.json'),"w") as f:
                 json.dump(b64_embeddings,f,indent=4)
 
             exit_code = 0
@@ -220,7 +234,7 @@ def main() -> None:
 
             plt.colorbar(heatmap, ax=ax, label=label)
             plt.tight_layout()
-            plt.savefig("heatmap.png", dpi=150)
+            plt.savefig(os.path.join(output_path, "heatmap.png"), dpi=150)
             plt.show()
 
 
