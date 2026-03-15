@@ -49,7 +49,7 @@ def main() -> None:
                         help="Specify the output path of the computation.",
                         type=str,
                         nargs=1,
-                        default=None
+                        default=""
                         )
 
     parser.add_argument("-E","--encode",
